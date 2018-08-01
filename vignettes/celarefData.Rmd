@@ -1,0 +1,36 @@
+---
+title: "celarefData"
+author: "Sarah Williams"
+date: "`r Sys.Date()`"
+output: html_document
+bibliography: celaref.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+The celarefData package is a repository of a few public datasets that have been
+processed using the *celaref* package. It is cheifly used to hold example data 
+that is used in the *celaref* package vignette - please refer to full examples 
+there.
+
+# Data
+
+## Dataset: Farmer et al 2017, Mouse lacrimal gland
+
+@Farmer2017 have published a survey of cell types in the mouse lacrimal gland 
+at two developmental stages in paper (*Defining epithelial cell dynamics and 
+lineage relationships in the developing lacrimal gland*).
+
+
+
+
+
+
+# Use
+
+
+# References
