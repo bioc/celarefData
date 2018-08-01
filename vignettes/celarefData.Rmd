@@ -2,8 +2,14 @@
 title: "celarefData"
 author: "Sarah Williams"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
 bibliography: celaref.bib
+vignette: >
+  %\VignetteIndexEntry{Manual}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, include=FALSE}
@@ -19,18 +25,85 @@ there.
 
 # Data
 
-## Dataset: Farmer et al 2017, Mouse lacrimal gland
+The data in this package is a series of data frames output from the
+*contrast_each_group_to_the_rest* function of the *celaref* package. 
+That is, these are differential experession results (calculated using 
+MAST @Finak2015), of each cell cluster versus the rest of the experiment. 
+
+For details and explanation see the celaref package vignette. 
+The commands used to make these data files are also in the make-data.R 
+file of this package.
+
+### Dataset : Farmer et al 2017, Mouse lacrimal gland
 
 @Farmer2017 have published a survey of cell types in the mouse lacrimal gland 
 at two developmental stages in paper (*Defining epithelial cell dynamics and 
-lineage relationships in the developing lacrimal gland*).
+lineage relationships in the developing lacrimal gland*). Only the more 
+mature P4 timepoint is included.
+
+Data:
+
+* Farmer2017_lacrimalP4
+
+### Dataset : Watkins et al 2009, PBMC microarrays 
+
+The ('Watkins2009') ‘HaemAtlas’ [@Watkins2009] microarray dataset of purified 
+PBMC cell types
+was downloaded as a normalised table from the 'haemosphere' website:
+http://haemosphere.org/datasets/show [@DeGraaf2016]
+
+Processing for those data files via *contrast_each_group_to_the_rest_for_norm_ma_with_limma* is described in the vignette.
+
+
+Data:
+
+* de_table_Watkins2009_pbmcs
 
 
 
+### Dataset : 10X genomics, pbmc4k, k=7
+
+10X genomics has several datasets available to download from their website,
+including the pbmc4k dataset, which contains PBMCs derived from a healthy
+individual. The kmeans k=7 cell-cluster assignments were chosen. 
+Source dataset available here:
+(https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/pbmc4k)
+
+Data: 
+
+* de_table_10X_pbmc4k_k7
+
+### Dataset : Zeisel et al 2015, Mouse brain
+
+
+In their paper 'Cell types in the mouse cortex and hippocampus revealed by
+single-cell RNA-seq', @Zeisel2015 performed single cell RNA sequencing
+in mouse, in two tissues (sscortex and ca1hippocampus).
+
+This data was download from the link provided in the paper: http://linnarssonlab.org/cortex
+
+As described in make-data.R, both counts and cell annotations were parsed from this file:
+https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/cortex/expression_mRNA_17-Aug-2014.txt
+
+
+Data:
+
+* de_table_Zeisel2015_cortex
+* de_table_Zeisel2015_hc
 
 
 
 # Use
 
+```{r eval=FALSE}
+library(ExperimentHub)
+eh = ExperimentHub()
+ExperimentHub::listResources(eh, "celarefData")
+de_table.10X_pbmc4k_k7        <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_10X_pbmc4k_k7')[[1]]
+de_table.Watkins2009PBMCs     <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Watkins2009_pbmcs')[[1]]
+de_table.zeisel.cortex        <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Zeisel2015_cortex')[[1]]
+de_table.zeisel.hippo         <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Zeisel2015_hc')[[1]]
+de_table.Farmer2017lacrimalP4 <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Farmer2017_lacrimalP4')[[1]]
+```
 
 # References
