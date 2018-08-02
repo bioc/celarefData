@@ -40,7 +40,7 @@ meta <- data.frame(
   TaxonomyId         = the_taxid,
   Coordinate_1_based = TRUE, #irrelevant.
   DataProvider       = the_data_provider,
-  Maintainer = "Bioconductor Package Maintainer <maintainer@bioconductor.org>",
+  Maintainer         = "Sarah Williams <sarah.williams1@monash.edu>",
   RDataClass         = "data.frame" ,
   DispatchClass      = "Rds",
   RDataPath          = paste0('celarefData/',data_title,".rda"),
