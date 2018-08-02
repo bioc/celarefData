@@ -43,7 +43,7 @@ meta <- data.frame(
   Maintainer         = "Sarah Williams <sarah.williams1@monash.edu>",
   RDataClass         = "data.frame" ,
   DispatchClass      = "Rds",
-  RDataPath          = paste0('celarefData/',data_title,".rda"),
+  RDataPath          = paste0('celarefData/',data_title,".rds"),
   Tags               = "",
   Notes              = ""
 )
