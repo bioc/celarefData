@@ -19,9 +19,11 @@ knitr::opts_chunk$set(echo = TRUE)
 # Overview
 
 The celarefData package is a repository of a few public datasets that have been
-processed using the *celaref* package. It is cheifly used to hold example data 
-that is used in the *celaref* package vignette - please refer to full examples 
-there.
+processed using the *celaref* package. 
+This includes some example data for the  *celaref* package vignette 
+(please refer to full examples there), and some other potentially useful 
+preprocessed reference datasets.
+
 
 # Data
 

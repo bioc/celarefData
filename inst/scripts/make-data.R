@@ -230,3 +230,22 @@ saveRDS(de_table.Farmer2017lacrimalP4,  file.path(output_dir, "de_table_Farmer20
 print('done')
 
 
+
+#-------------------------------------------------------------------------------
+# Purified PBMCs
+#
+#Zheng2017
+#Massively parallel digital transcriptional profiling of single cells
+
+# Data and scripts obtained from 
+# https://github.com/10XGenomics/single-cell-3prime-paper/tree/master/pbmc68k_analysis
+# 
+# Note that the cellcluster labels were obtained by re-running the 
+# scripts (specifically 'main_process_pure_pbmc.R' ) also provided by the authors at:
+# https://github.com/10XGenomics/single-cell-3prime-paper/tree/master/pbmc68k_analysis
+# 
+# The environment from running main_process_pure_pbmc.R was saved....
+#
+
+
+
