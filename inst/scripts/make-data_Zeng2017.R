@@ -1,52 +1,32 @@
-#setwd("/mnt/ceph/mbp/servers/bioinformatics-platform/home/sarah.williams/projects/cell_groupings/analysis/18_bigpbmc")
-
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Reran main_process_pure_pbmc.R locally, and saved the environment.
-# 
-# Get important parts from that .rdata file, and save them in someting smaller!
-# setwd("~/data/projects/cell_groupings/ref_data/single-cell-3prime-paper/pbmc68k_data")
-# load("checkpoint5_main_process_pure_pbmc_run.rdata")
-# saveRDS(sub_idx,        "sub_idx.rds")
-# saveRDS(pure_select_11, 'pure_select_11.rds')
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-# Also, saved specific subsets of the reference datasets (all of them?)
-all_pure_pbmc_data      <- readRDS("all_pure_pbmc_data.rds") # Big, but loadable.
-all_pure_select_11types <- readRDS("all_pure_select_11types.rds")
-pbmc68k_data            <- readRDS("pbmc68k_data.rds")
-
-
-genes <-all_pure_pbmc_data$all_data[[1]]$hg19$gene_symbols
-saveRDS(genes, "genes.rds")
-
-
-## all_json <- all_pure_pbmc_data$all_json
-## all_metrics <- all_pure_pbmc_data$all_metrics
-## all_mol_info <- all_pure_pbmc_data$all_mol_info
-
-# 
-## saveRDS(all_pure_pbmc_data$all_data[[10]]$hg19, "data_sample10_hg19.rds")
-## saveRDS(all_json,   "all_json.rds")
-## saveRDS(all_metrics, "all_metrics.rds")
-## saveRDS(all_mol_info, "all_mol_info.rds") #  This is the large part.
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# In a new session, using the objects as saved above - 
-# process data with celaref.
 library(tidyverse)
 library(Matrix)
 library(celaref)
 library(SingleCellExperiment)
 library(HDF5Array)
 
-genes          <- readRDS("genes.rds") 
-pure_select_11 <- readRDS('pure_select_11.rds')
 
+# Downloaded all_pure_pbmc_data.rds includes per 10x library data, 
+# with gene info. And lots of other stuff. 
+# Only useing gene info - data not split into cell types in this yet.
+if (! file.exists("all_data.rds")) {
+   all_pure_pbmc_data <- readRDS("all_pure_pbmc_data.rds") 
+   all_data <- all_pure_pbmc_data$all_data
+   saveRDS(all_data, "all_data.rds")
+   rm(all_pure_pbmc_data)
+} else {
+   all_data  <- readRDS("all_data.rds")
+}
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Reran main_process_pure_pbmc.R locally, 
+# and saved the final environment as "main_process_pure_pbmc.rdata"
+# Thne extracted counts matricies that have per 11x cell-type data 
+if (! file.exists("pure_select_11.rds")) {
+   all_pure_pbmc_data <- load("main_process_pure_pbmc.rdata")
+   saveRDS(pure_select_11, 'pure_select_11.rds')
+} else {
+   pure_select_11 <- readRDS("pure_select_11.rds")
+}
 
 # Order from supplied scripts. Order matters!
 pure_id<-c("CD34+","CD56+ NK","CD4+/CD45RA+/CD25- Naive T", 
@@ -54,100 +34,76 @@ pure_id<-c("CD34+","CD56+ NK","CD4+/CD45RA+/CD25- Naive T",
            "CD4+/CD45RO+ Memory","CD8+ Cytotoxic T","CD19+ B",
            "CD4+ T Helper2","CD14+ Monocyte","Dendritic")
 
-
-## Get Gene info table
-gene_info_table <- tibble(GeneIndex  = seq_len(length(genes)),
-                          GeneSymbol = genes)  #NB: genes isn't unique.
-
-## Cell info table
-
-# Make up arbitrary cell IDs
-one_cluster_cell_info_table <- function(num_cells, cell_type, 
-                                        cell_type_id, the_library){
-   tibble (CellId   = paste0(cell_type_id,"_", seq_len(num_cells)), 
-           CellType = as.character(cell_type),
-           Library  = as.character(the_library))
-}
-cells_per_type         <- sapply(FUN=nrow, pure_select_11)
-cell_info_table        <- bind_rows(mapply(
-   FUN=one_cluster_cell_info_table, 
-   cells_per_type, pure_id, seq_len(11), c(1:10,10), # 10 libs, 11 cell types
-   SIMPLIFY = FALSE )) 
-cell_info_table$CellType <- factor(cell_info_table$CellType, levels = pure_id)
-#CellId Cluster Library
-#<chr>  <fct>   <chr>  
-#1 1_1    CD34+   1      
-#2 1_2    CD34+   1     
-
-
-## Big counts matrix -  SHOULD SAVE Hdt5summarisedExperiments here!
-# Unlabelled, and also want transposed.
-counts_matrix <-  t(pure_select_11[[1]])
-for (i in 2:11) {
-   counts_matrix <- cbind(counts_matrix, t(pure_select_11[[i]]))
-}
-colnames(counts_matrix) <- cell_info_table$CellId
-rownames(counts_matrix) <- gene_info_table$GeneIndex
-
-
-## ALT.
+# Genes can be lifted from all_data (see main_process_pure_pbmc.R)
+gene_info_table <- tibble(
+   ID         = all_data[[1]][1]$hg19$genes,
+   EnsemblID  = all_data[[1]][1]$hg19$genes,
+   GeneSymbol = all_data[[1]][1]$hg19$gene_symbols
+)
 
 save_cell_type_hdf5 <- function(cell_type_id, the_library) {
    
    cell_type          <- pure_id[cell_type_id]
-   num_cells_for_type <- nrow(pure_select_11[cell_type])
+   num_cells_for_type <- nrow(pure_select_11[[cell_type_id]])
    
    cluster_cell_info_table <- tibble (
-      CellId   = paste0(cell_type_id,"_", seq_len(num_cells_for_type)), 
+      cell_sample = paste0(cell_type_id,"_", seq_len(num_cells_for_type)), 
       CellType = as.character(cell_type),
       Library  = as.character(the_library)
    )
    
+   counts_matrix <-  t(pure_select_11[[cell_type_id]])
+   colnames(counts_matrix) <- cluster_cell_info_table$cell_sample
+   rownames(counts_matrix) <- gene_info_table$ID
+   
    sce <- SingleCellExperiment(
-      assays = list(counts = t(pure_select_11[[cell_type]]) ) ,
+      assays = list(counts = counts_matrix) ,
       colData = cluster_cell_info_table,
       rowData = gene_info_table
    )
    return(sce)
 }
 
+
+
+
+
+
 # NB: 10 libs, 11 cell types - last one has two!
-sce.purePBMC <- cbind(mapply(
-   FUN=save_cell_type_hdf5 , c(seq_len(10),10), seq_len(11)))
+sce.purePBMC <- do.call(cbind, 
+        mapply(FUN=save_cell_type_hdf5 ,  seq_len(11), c(seq_len(10),10))) 
 
-sce.purePBM$CellType <- factor(sce.purePBMC$CellType, levels = pure_id)
+# Tidy, use GeneSymbol, filter and save.
+sce.purePBMC$CellType <- factor(sce.purePBMC$CellType, levels = pure_id)
+sce.purePBMC$group    <- sce.purePBMC$CellType
+rowData(sce.purePBMC)$total_count <- Matrix::rowSums(counts(sce.purePBMC))
 
-saveHDF5SummarizedExperiment(sce.purePBMC, "sce_Zheng2017_purePBMC")
-
-
-
-
-
-
-
-#----------------
-# Create a summarised experiment objct.
-dataset_se.pbmc68kpure  <- load_se_from_tables(counts_matrix, 
-                                               cell_info_table = cell_info_table,
-                                               gene_info_table = gene_info_table,
-                                               group_col_name  = 'CellType')
-
-rowData(dataset_se.pbmc68kpure.subset)$total_count <- Matrix::rowSums(assay(dataset_se.pbmc68kpure.subset))
-convert_se_gene_ids( dataset_se.pbmc68kpure.subset,  new_id='GeneSymbol', eval_col='total_count')
-
-#GeneIndex
+sce.purePBMC <- convert_se_gene_ids( sce.purePBMC,  
+                                     new_id   = 'GeneSymbol', 
+                                     eval_col = 'total_count')
+sce.purePBMC <- trim_small_groups_and_low_expression_genes(sce.purePBMC)
+sce.purePBMC <- saveHDF5SummarizedExperiment(sce.purePBMC, 
+                                             "sce_Zheng2017_purePBMC")
 
 
 
+#--------------------------------
+# Summarised experiment object created - now process for celaref reference.
+# pure.purePBMC <- loadHDF5SummarizedExperiment(sce.purePBMC, 
+#                                               "sce_Zheng2017_purePBMC")
 
+# Don't need all cells, 1000 from each group should be plenty for DE!
+# Because this is cell sorted data, cell proportions are meaningless.
+set.seed(12)
+sce.purePBMC.1000 <- subset_cells_by_group(sce.purePBMC, n.group = 1000)
+de_table.Zheng2017purePBMC <- contrast_each_group_to_the_rest(
+   sce.purePBMC.1000,  
+   dataset_name="Zheng2017purePBMC", 
+   num_cores = 4)
 
+saveRDS(de_table.Zheng2017purePBMC,  
+        file.path(output_dir, "de_table_Zheng2017purePBMC.rds"))
 
-dataset_se.pbmc68kpure.subset <- subset_se_cells_by_group(dataset_se.pbmc68kpure)
+print('done')
 
-# Use gene symbols for ids (this does remove some genes)
-rowData(dataset_se.pbmc68kpure.subset)$total_count <- Matrix::rowSums(assay(dataset_se.pbmc68kpure.subset))
-dataset_se.pbmc68kpure.subset <-  convert_se_gene_ids( dataset_se.pbmc68kpure.subset,  new_id='GeneSymbol', eval_col='total_count')
-
-# Useful filtering  - remove too-small groups, unwanted cells
-dataset_se.pbmc68kpure.subset <- trim_small_groups_and_low_expression_genes(dataset_se.pbmc68kpure.subset)
 
