@@ -28,6 +28,7 @@ if (! file.exists("pure_select_11.rds")) {
    pure_select_11 <- readRDS("pure_select_11.rds")
 }
 
+
 # Order from supplied scripts. Order matters!
 pure_id<-c("CD34+","CD56+ NK","CD4+/CD45RA+/CD25- Naive T", 
            "CD4+/CD25 T Reg","CD8+/CD45RA+ Naive Cytotoxic",
@@ -68,7 +69,7 @@ save_cell_type_hdf5 <- function(cell_type_id, the_library) {
 
 
 
-
+if (FALSE) {
 # NB: 10 libs, 11 cell types - last one has two!
 sce.purePBMC <- do.call(cbind, 
         mapply(FUN=save_cell_type_hdf5 ,  seq_len(11), c(seq_len(10),10))) 
@@ -84,7 +85,10 @@ sce.purePBMC <- convert_se_gene_ids( sce.purePBMC,
 sce.purePBMC <- trim_small_groups_and_low_expression_genes(sce.purePBMC)
 sce.purePBMC <- saveHDF5SummarizedExperiment(sce.purePBMC, 
                                              "sce_Zheng2017_purePBMC")
+} else {
 
+   sce.purePBMC <- loadHDF5SummarizedExperiment("sce_Zheng2017_purePBMC")
+}
 
 
 #--------------------------------
@@ -102,7 +106,7 @@ de_table.Zheng2017purePBMC <- contrast_each_group_to_the_rest(
    num_cores = 4)
 
 saveRDS(de_table.Zheng2017purePBMC,  
-        file.path(output_dir, "de_table_Zheng2017purePBMC.rds"))
+        file.path("de_table_Zheng2017purePBMC.rds"))
 
 print('done')
 
