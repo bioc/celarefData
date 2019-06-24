@@ -94,6 +94,52 @@ Data:
 * de_table_Zeisel2015_hc
 
 
+### Dataset : Zheng et al 2017, Pure PBMCs
+
+As part of their analysis described in 
+_'Massively parallel digital transcriptional profiling of single cells'_, 
+Zheng et al generated a reference dataset of PBMC 
+(peripheral blood mononuclear cell) sub-populations [@Zheng2017].
+These cell types are:
+
+* CD34+                        
+* CD56+ NK                     
+* CD4+/CD45RA+/CD25- Naive T  
+* CD4+/CD25 T Reg              
+* CD8+/CD45RA+ Naive Cytotoxic 
+* CD4+/CD45RO+ Memory         
+* CD8+ Cytotoxic T             
+* CD19+ B                      
+* CD4+ T Helper2              
+* CD14+ Monocyte               
+* Dendritic   
+
+They used a bead-based purification approach described in their paper, followed
+by the analysis which they have shared at https://github.com/10XGenomics/single-cell-3prime-paper/tree/master/pbmc68k_analysis 
+
+------
+
+
+To create the derived differential expression tables suitable for using as a 
+reference dataset with celaref. 
+
+1. Data and scripts obtained from https://github.com/10XGenomics/single-cell-3prime-paper/tree/master/pbmc68k_analysis
+ 
+2. Cell cluster labels were obtained by the (rather nicely reproduceable) 
+analysis scripts (specifically 'main_process_pure_pbmc.R' ) also provided by
+Zheng et al at:
+https://github.com/10XGenomics/single-cell-3prime-paper/tree/master/pbmc68k_analysis
+
+3. Cells were subsetted to a _maximum of 1000 per group_ - enough for 
+the differential expression for this puropose.
+
+4. Gene-level ID was set to the GeneSymbol, choosing the more highly 
+expressed ensemblID if multiple mappings exist. The *de_table_Zheng2017purePBMC*
+dataset has GeneSymbol IDs, wherease *de_table_Zheng2017purePBMC_ensembl* was
+converted back to ensemble IDs. 
+
+Exact commands are provided in celarefData make-data.R script.
+
 
 # Use
 
@@ -107,6 +153,9 @@ de_table.Watkins2009PBMCs     <- ExperimentHub::loadResources(eh, "celarefData",
 de_table.zeisel.cortex        <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Zeisel2015_cortex')[[1]]
 de_table.zeisel.hippo         <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Zeisel2015_hc')[[1]]
 de_table.Farmer2017lacrimalP4 <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Farmer2017_lacrimalP4')[[1]]
+
+de_table.Zheng2017purePBMC         <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Zheng2017purePBMC')[[1]]
+de_table.Zheng2017purePBMC_ensembl <- ExperimentHub::loadResources(eh, "celarefData", 'de_table_Zheng2017purePBMC_ensembl')[[1]]
 
 head(de_table.10X_pbmc4k_k7)
 ```

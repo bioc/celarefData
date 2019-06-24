@@ -7,7 +7,7 @@ library(HDF5Array)
 
 # Downloaded all_pure_pbmc_data.rds includes per 10x library data, 
 # with gene info. And lots of other stuff. 
-# Only useing gene info - data not split into cell types in this yet.
+# Only useing gene info - data is not split into cell types in this yet.
 if (! file.exists("all_data.rds")) {
    all_pure_pbmc_data <- readRDS("all_pure_pbmc_data.rds") 
    all_data <- all_pure_pbmc_data$all_data
@@ -28,8 +28,7 @@ if (! file.exists("pure_select_11.rds")) {
    pure_select_11 <- readRDS("pure_select_11.rds")
 }
 
-
-# Order from supplied scripts. Order matters!
+# Order from main_process_pure_pbmc.R Order matters!
 pure_id<-c("CD34+","CD56+ NK","CD4+/CD45RA+/CD25- Naive T", 
            "CD4+/CD25 T Reg","CD8+/CD45RA+ Naive Cytotoxic",
            "CD4+/CD45RO+ Memory","CD8+ Cytotoxic T","CD19+ B",
@@ -65,11 +64,7 @@ save_cell_type_hdf5 <- function(cell_type_id, the_library) {
    return(sce)
 }
 
-
-
-
-
-if (FALSE) {
+if (! file.exists("sce_Zheng2017_purePBMC")) {
 # NB: 10 libs, 11 cell types - last one has two!
 sce.purePBMC <- do.call(cbind, 
         mapply(FUN=save_cell_type_hdf5 ,  seq_len(11), c(seq_len(10),10))) 
@@ -86,7 +81,6 @@ sce.purePBMC <- trim_small_groups_and_low_expression_genes(sce.purePBMC)
 sce.purePBMC <- saveHDF5SummarizedExperiment(sce.purePBMC, 
                                              "sce_Zheng2017_purePBMC")
 } else {
-
    sce.purePBMC <- loadHDF5SummarizedExperiment("sce_Zheng2017_purePBMC")
 }
 
