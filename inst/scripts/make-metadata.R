@@ -9,7 +9,7 @@ data_title <- c('de_table_10X_pbmc4k_k7',
                 'de_table_Zheng2017purePBMC',
                 'de_table_Zheng2017purePBMC_ensembl')
 
-the_species <- c('human', 'human', 'mouse', 'mouse', 'mouse', 'human', 'human')
+the_species <- c('Homo sapiens', 'Homo sapiens', 'Mus musculus', 'Mus musculus', 'Mus musculus', 'Homo sapiens', 'Homo sapiens')
 the_taxid   <- c(9606,     9606,    10090,   10090,   10090,   9606  ,  9606    )
 
 the_data_provider <- c("10X",
@@ -35,16 +35,21 @@ the_source_version <- c("March 2018", # from dl dates
                         "17-Aug-2014",
                         "17-Aug-2014",
                         "Oct 2018",
-                        "Jul 26, 2016", # script edit date.
-                        "Jul 26, 2016" 
+                        "Jul 26 2016", # script edit date.
+                        "Jul 26 2016" 
                         )
+
+# Versoion pf bioc added.
+the_bioc_versions <- c(c(rep('3.8',  times=5), 
+                         rep('3.10', times=2)))
+
 
 meta <- data.frame(
   Title              = data_title,
   Description        = paste(data_title, "object pre-processed by celaref. See celaref vignette for citation and details."),
-  BiocVersion        = "3.8",
+  BiocVersion        = the_bioc_versions,
   Genome             = "", #irrelevant, really.
-  SourceType         = "txt",
+  SourceType         = "TXT",
   SourceUrl          = the_urls,
   SourceVersion      = the_source_version,
   Species            = the_species,
