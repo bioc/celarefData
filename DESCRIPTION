@@ -1,6 +1,6 @@
 Package: celarefData
 Title: Processed scRNA data for celaref Vignette - cell labelling by reference
-Version: 1.9.0
+Version: 1.10.0
 Authors@R: person("Sarah", "Williams", email = "sarah.williams1@monash.edu", role = c("aut", "cre"))
 Description: This experiment data contains some processed data used in the 
     celaref package vignette. These are publically available datasets, 
